@@ -1,29 +1,34 @@
-pipeline {
-    agent { label "dev-server" }
+pipeline{
+    agent { label  'dev-ssh-agent'}
+    
     stages{
-        stage("Clone Code"){
-            steps{
-                git url: "https://github.com/LondheShubham153/node-todo-cicd.git", branch: "master"
+        stage('Build'){
+            steps {
+                git url: 'https://github.com/ShubhamBMatere/node-todo-cicd.git', branch : 'master'
             }
         }
-        stage("Build and Test"){
-            steps{
-                sh "docker build . -t node-app-test-new"
+        stage('Build And Test'){
+            steps {
+                echo "Building and testing in progress..."
+                sh 'docker build . -t shubhambmatere/node-todo-cicd-app:latest'
             }
         }
-        stage("Push to Docker Hub"){
-            steps{
-                withCredentials([usernamePassword(credentialsId:"dockerHub",passwordVariable:"dockerHubPass",usernameVariable:"dockerHubUser")]){
-                sh "docker tag node-app-test-new ${env.dockerHubUser}/node-app-test-new:latest"
-                sh "docker login -u ${env.dockerHubUser} -p ${env.dockerHubPass}"
-                sh "docker push ${env.dockerHubUser}/node-app-test-new:latest"
+        stage('Log in to dockerHub And Push Image'){
+            steps {
+                echo "DockerHub login in progress..."
+                withCredentials([usernamePassword(credentialsId:'dockerHub',
+                passwordVariable:'dockerHubPass',usernameVariable:'dockerHubUser')])
+                {
+                    sh "docker login -u ${env.dockerHubUser} -p ${env.dockerHubPass}"
+                    sh 'docker push shubhambmatere/node-todo-cicd-app:latest'
                 }
             }
         }
-        stage("Deploy"){
-            steps{
-                sh "docker-compose down && docker-compose up -d"
-            }
-        }
+        stage('Deploy'){
+            steps {
+               echo "Deployment in progress..."
+               sh 'docker-compose down && docker-compose up -d'
+                }
+             }
+         }
     }
-}
