@@ -1,15 +1,22 @@
 pipeline{
-    agent { label  'dev-build-agent'}
+    agent { label  'image-push-agent'}
     
     stages{
-        stage('Build2'){
+        stage('Log in to dockerHub And Push Image'){
             steps {
-                echo "Build2 in progress..."
+                echo "DockerHub login in progress..."
+                withCredentials([usernamePassword(credentialsId:'dockerHub',
+                passwordVariable:'dockerHubPass',usernameVariable:'dockerHubUser')])
+                {
+                    sh "docker login -u ${env.dockerHubUser} -p ${env.dockerHubPass}"
+                    sh 'docker push shubhambmatere/node-todo-cicd-app:latest'
+                }
             }
         }
-        stage('Deploy2'){
+        stage('Deploy'){
             steps {
-               echo "Deployment2 in progress..."
+               echo "Deployment in progress..."
+               sh 'docker-compose down && docker-compose up -d'
                 }
              }
          }
