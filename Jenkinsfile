@@ -1,5 +1,5 @@
 pipeline{
-    agent { label  'dev-ssh-agent'}
+    agent { label  'dev-build-agent'}
     
     stages{
         stage('Build'){
